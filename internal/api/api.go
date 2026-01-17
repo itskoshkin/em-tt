@@ -33,12 +33,12 @@ func (a *API) registerRoutes() {
 	{
 		//subscriptions := base.Group("/subscriptions")
 		{
-			base.POST("/subscriptions", a.ctrl.Create)
-			base.GET("/subscriptions/total", a.ctrl.TotalCost) // Must be above parameterized route to avoid conflict
-			base.GET("/subscriptions/:id", a.ctrl.Get)
-			base.PUT("/subscriptions/:id", a.ctrl.Update)
-			base.DELETE("/subscriptions/:id", a.ctrl.Delete)
-			base.GET("/subscriptions", a.ctrl.List)
+			base.POST("/subscriptions", a.ctrl.CreateSubscription)
+			base.GET("/subscriptions/total", a.ctrl.TotalSubscriptionsCost) // Must be above parameterized route to avoid conflict
+			base.GET("/subscriptions/:id", a.ctrl.GetSubscriptionByID)
+			base.PUT("/subscriptions/:id", a.ctrl.UpdateSubscriptionByID)
+			base.DELETE("/subscriptions/:id", a.ctrl.DeleteSubscriptionByID)
+			base.GET("/subscriptions", a.ctrl.ListSubscriptions)
 		}
 	}
 }
