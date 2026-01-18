@@ -31,7 +31,6 @@ func NewSubscriptionsStorage(db *gorm.DB) SubscriptionStorage {
 }
 
 func (ss *SubscriptionStorageImpl) CreateSubscription(ctx context.Context, sub *models.Subscription) error {
-	sub.ID = uuid.New()
 	return ss.db.WithContext(ctx).Create(sub).Error
 }
 

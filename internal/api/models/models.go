@@ -1,6 +1,7 @@
 package models
 
 import (
+	"errors"
 	"fmt"
 	"strings"
 	"time"
@@ -13,6 +14,11 @@ import (
 type ErrorResponse struct {
 	Error string `json:"error"`
 }
+
+var (
+	ErrBadJSON  = errors.New(fmt.Sprintf("Invalid request body"))
+	ErrBadParam = errors.New(fmt.Sprintf("Invalid request uri"))
+)
 
 type CreateSubscriptionRequest struct {
 	ServiceName string  `json:"service_name"`
@@ -35,7 +41,21 @@ func (req *CreateSubscriptionRequest) Validate() error {
 		return fmt.Errorf("user ID must be a valid UUID")
 	}
 	if req.StartDate == "" {
-		return fmt.Errorf("start date is required") //TODO validate date format
+		return fmt.Errorf("start date is required")
+	}
+	start, err := dates.String2Date(req.StartDate)
+	if err != nil {
+		return fmt.Errorf("start date: %w", err)
+	}
+	if req.EndDate != nil && *req.EndDate != "" {
+		var end time.Time
+		end, err = dates.String2Date(*req.EndDate)
+		if err != nil {
+			return fmt.Errorf("end date: %w", err)
+		}
+		if end.Before(start) {
+			return fmt.Errorf("end date cannot precede start date")
+		}
 	}
 	return nil
 }
@@ -64,14 +84,7 @@ func (req *CreateSubscriptionRequest) ParseDates() (time.Time, *time.Time, error
 }
 
 type CreateSubscriptionResponse struct {
-	ID          uuid.UUID `json:"id"`
-	ServiceName string    `json:"service_name"`
-	Price       int       `json:"price"`
-	UserID      string    `json:"user_id"`
-	StartDate   string    `json:"start_date"`
-	EndDate     string    `json:"end_date,omitempty"`
-	CreatedAt   time.Time `json:"created_at"`
-	UpdatedAt   time.Time `json:"updated_at"`
+	ID uuid.UUID `json:"id"`
 }
 
 type UpdateSubscriptionRequest struct {

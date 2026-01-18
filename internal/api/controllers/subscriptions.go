@@ -21,7 +21,7 @@ func NewSubscriptionController(ss service.SubscriptionService) *SubscriptionCont
 func (ctrl *SubscriptionController) CreateSubscription(ctx *gin.Context) {
 	var req apiModels.CreateSubscriptionRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()}) //TODO here and below: Hide internal error details? Or nothing sensitive exposed here?
+		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: apiModels.ErrBadJSON.Error()})
 		return
 	}
 
@@ -29,9 +29,9 @@ func (ctrl *SubscriptionController) CreateSubscription(ctx *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrValidationError):
-			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()}) //TODO here and below: Hide internal error details? Or nothing sensitive exposed here?
 		default:
-			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: "internal server error"})
+			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: service.ErrIES.Error()})
 		}
 		return
 	}
@@ -42,7 +42,7 @@ func (ctrl *SubscriptionController) CreateSubscription(ctx *gin.Context) {
 func (ctrl *SubscriptionController) GetSubscriptionByID(ctx *gin.Context) {
 	var id apiModels.ItemByIDRequest
 	if err := ctx.ShouldBindUri(&id); err != nil {
-		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: apiModels.ErrBadParam.Error()})
 		return
 	}
 
@@ -52,9 +52,9 @@ func (ctrl *SubscriptionController) GetSubscriptionByID(ctx *gin.Context) {
 		case errors.Is(err, service.ErrValidationError):
 			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
 		case errors.Is(err, service.ErrNotFound):
-			ctx.JSON(http.StatusNotFound, apiModels.ErrorResponse{Error: "subscription not found"})
+			ctx.JSON(http.StatusNotFound, apiModels.ErrorResponse{Error: err.Error()})
 		default:
-			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: "internal server error"})
+			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: service.ErrIES.Error()})
 		}
 		return
 	}
@@ -65,13 +65,13 @@ func (ctrl *SubscriptionController) GetSubscriptionByID(ctx *gin.Context) {
 func (ctrl *SubscriptionController) UpdateSubscriptionByID(ctx *gin.Context) {
 	var id apiModels.ItemByIDRequest
 	if err := ctx.ShouldBindUri(&id); err != nil {
-		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: apiModels.ErrBadParam.Error()})
 		return
 	}
 
-	var req apiModels.CreateSubscriptionRequest
+	var req apiModels.UpdateSubscriptionRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
-		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: apiModels.ErrBadJSON.Error()})
 		return
 	}
 
@@ -81,9 +81,9 @@ func (ctrl *SubscriptionController) UpdateSubscriptionByID(ctx *gin.Context) {
 		case errors.Is(err, service.ErrValidationError):
 			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
 		case errors.Is(err, service.ErrNotFound):
-			ctx.JSON(http.StatusNotFound, apiModels.ErrorResponse{Error: "subscription not found"})
+			ctx.JSON(http.StatusNotFound, apiModels.ErrorResponse{Error: err.Error()})
 		default:
-			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: "internal server error"})
+			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: service.ErrIES.Error()})
 		}
 		return
 	}
@@ -94,7 +94,7 @@ func (ctrl *SubscriptionController) UpdateSubscriptionByID(ctx *gin.Context) {
 func (ctrl *SubscriptionController) DeleteSubscriptionByID(ctx *gin.Context) {
 	var id apiModels.ItemByIDRequest
 	if err := ctx.ShouldBindUri(&id); err != nil {
-		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: apiModels.ErrBadParam.Error()})
 		return
 	}
 
@@ -104,9 +104,9 @@ func (ctrl *SubscriptionController) DeleteSubscriptionByID(ctx *gin.Context) {
 		case errors.Is(err, service.ErrValidationError):
 			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
 		case errors.Is(err, service.ErrNotFound):
-			ctx.JSON(http.StatusNotFound, apiModels.ErrorResponse{Error: "subscription not found"})
+			ctx.JSON(http.StatusNotFound, apiModels.ErrorResponse{Error: err.Error()})
 		default:
-			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: "internal server error"})
+			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: service.ErrIES.Error()})
 		}
 		return
 	}

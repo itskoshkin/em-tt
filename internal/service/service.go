@@ -14,14 +14,15 @@ import (
 )
 
 var (
-	ErrValidationError = errors.New("validation error")
-	ErrNotFound        = errors.New("subscription not found")
+	ErrValidationError = errors.New(fmt.Sprintf("Validation error"))
+	ErrNotFound        = errors.New(fmt.Sprintf("Subscription not found"))
+	ErrIES             = errors.New(fmt.Sprintf("Internal server error"))
 )
 
 type SubscriptionService interface {
 	CreateSubscription(ctx context.Context, s *apiModels.CreateSubscriptionRequest) (*models.Subscription, error)
 	GetSubscriptionByID(ctx context.Context, id apiModels.ItemByIDRequest) (*models.Subscription, error)
-	UpdateSubscriptionByID(ctx context.Context, id apiModels.ItemByIDRequest, sub *apiModels.CreateSubscriptionRequest) (*models.Subscription, error)
+	UpdateSubscriptionByID(ctx context.Context, id apiModels.ItemByIDRequest, sub *apiModels.UpdateSubscriptionRequest) (*models.Subscription, error)
 	DeleteSubscriptionByID(ctx context.Context, id apiModels.ItemByIDRequest) error
 	ListSubscriptions(ctx context.Context, i interface{}) ([]models.Subscription, error)
 	TotalSubscriptionsCost(ctx context.Context, i interface{}) (int64, error)
@@ -51,12 +52,9 @@ func (ss *SubscriptionServiceImpl) CreateSubscription(ctx context.Context, req *
 		Price:       req.Price,
 		UserID:      uuid.MustParse(req.UserID), //MARK: Assuming already validated above
 		StartDate:   start,
-		//EndDate:     *end,
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
-	}
-	if end != nil {
-		//sub.EndDate = *end //FIXME: WIP
+		EndDate:     end,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	if err = ss.storage.CreateSubscription(ctx, sub); err != nil {
@@ -84,7 +82,7 @@ func (ss *SubscriptionServiceImpl) GetSubscriptionByID(ctx context.Context, id a
 	return sub, nil
 }
 
-func (ss *SubscriptionServiceImpl) UpdateSubscriptionByID(ctx context.Context, id apiModels.ItemByIDRequest, updated *apiModels.CreateSubscriptionRequest) (*models.Subscription, error) {
+func (ss *SubscriptionServiceImpl) UpdateSubscriptionByID(ctx context.Context, id apiModels.ItemByIDRequest, updated *apiModels.UpdateSubscriptionRequest) (*models.Subscription, error) {
 	uid, err := uuid.Parse(id.ID)
 	if err != nil {
 		return nil, fmt.Errorf("%w: invalid subscription UUID", ErrValidationError)
@@ -103,18 +101,35 @@ func (ss *SubscriptionServiceImpl) UpdateSubscriptionByID(ctx context.Context, i
 		}
 	}
 
-	startDate, endDate, err := updated.ParseDates()
+	reqStart, reqEnd, clearEnd, err := updated.ParseDates()
 	if err != nil {
 		return nil, fmt.Errorf("%w: %s", ErrValidationError, err.Error())
 	}
-
-	current.ServiceName = updated.ServiceName
-	current.Price = updated.Price
-	current.UserID = uuid.MustParse(updated.UserID) //MARK: Assuming already validated above
-	current.StartDate = startDate
-	if endDate != nil {
-		//current.EndDate = *endDate //FIXME: WIP
+	startDate := current.StartDate
+	if reqStart != nil {
+		startDate = *reqStart
 	}
+	endDate := current.EndDate
+	if clearEnd {
+		endDate = nil
+	} else if reqEnd != nil {
+		endDate = reqEnd
+	}
+	if endDate != nil && endDate.Before(startDate) {
+		return nil, fmt.Errorf("%w: subscription end date cannot precede start date", ErrValidationError)
+	}
+
+	if updated.ServiceName != nil {
+		current.ServiceName = *updated.ServiceName
+	}
+	if updated.Price != nil {
+		current.Price = *updated.Price
+	}
+	//if updated.UserID != nil {
+	//	current.UserID = uuid.MustParse(*updated.UserID) //MARK: Assuming already validated above; not stated if we should allow changing ID
+	//}
+	current.StartDate = startDate
+	current.EndDate = endDate
 	current.UpdatedAt = time.Now()
 
 	if err = ss.storage.UpdateSubscriptionByID(ctx, current); err != nil {
