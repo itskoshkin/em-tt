@@ -7,6 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 
 	apiModels "subscription-aggregator-service/internal/api/models"
+	_ "subscription-aggregator-service/internal/models" // Make visible for swaggo/swag tool
 	"subscription-aggregator-service/internal/service"
 )
 
@@ -18,6 +19,17 @@ func NewSubscriptionController(ss service.SubscriptionService) *SubscriptionCont
 	return &SubscriptionController{subscriptionService: ss}
 }
 
+// CreateSubscription godoc
+// @Summary Create a new subscription
+// @Description Adds a new subscription record to the database with given details
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param request body apiModels.CreateSubscriptionRequest true "New subscription details"
+// @Success 201 {object} models.Subscription
+// @Failure 400 {object} models.ErrorResponse
+// @Failure 500 {object} apiModels.ErrorResponse //MARK: Looks like swaggo/swag doesn't care if it's imported package name or path, models still generated
+// @Router /subscriptions [post]
 func (ctrl *SubscriptionController) CreateSubscription(ctx *gin.Context) {
 	var req apiModels.CreateSubscriptionRequest
 	if err := ctx.ShouldBindJSON(&req); err != nil {
@@ -39,6 +51,17 @@ func (ctrl *SubscriptionController) CreateSubscription(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, sub)
 }
 
+// GetSubscriptionByID godoc
+// @Summary Get a subscription by ID
+// @Description Returns a single subscription record by its UUID
+// @Tags subscriptions
+// @Produce json
+// @Param id path string true "Subscription UUID"
+// @Success 200 {object} models.Subscription
+// @Failure 400 {object} apiModels.ErrorResponse
+// @Failure 404 {object} apiModels.ErrorResponse
+// @Failure 500 {object} apiModels.ErrorResponse
+// @Router /subscriptions/{id} [get]
 func (ctrl *SubscriptionController) GetSubscriptionByID(ctx *gin.Context) {
 	var id apiModels.ItemByIDRequest
 	if err := ctx.ShouldBindUri(&id); err != nil {
@@ -62,6 +85,19 @@ func (ctrl *SubscriptionController) GetSubscriptionByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, sub)
 }
 
+// UpdateSubscriptionByID godoc
+// @Summary Update a subscription
+// @Description Updates an existing subscription record. Supports partial updates.
+// @Tags subscriptions
+// @Accept json
+// @Produce json
+// @Param id path string true "Subscription UUID"
+// @Param request body apiModels.UpdateSubscriptionRequest true "Subscription update data"
+// @Success 200 {object} models.Subscription
+// @Failure 400 {object} apiModels.ErrorResponse
+// @Failure 404 {object} apiModels.ErrorResponse
+// @Failure 500 {object} apiModels.ErrorResponse
+// @Router /subscriptions/{id} [put]
 func (ctrl *SubscriptionController) UpdateSubscriptionByID(ctx *gin.Context) {
 	var id apiModels.ItemByIDRequest
 	if err := ctx.ShouldBindUri(&id); err != nil {
@@ -91,6 +127,16 @@ func (ctrl *SubscriptionController) UpdateSubscriptionByID(ctx *gin.Context) {
 	ctx.JSON(http.StatusOK, sub)
 }
 
+// DeleteSubscriptionByID godoc
+// @Summary Delete a subscription
+// @Description Marks a subscription record as (soft-)deleted in the database
+// @Tags subscriptions
+// @Param id path string true "Subscription UUID"
+// @Success 200 "OK"
+// @Failure 400 {object} apiModels.ErrorResponse
+// @Failure 404 {object} apiModels.ErrorResponse
+// @Failure 500 {object} apiModels.ErrorResponse
+// @Router /subscriptions/{id} [delete]
 func (ctrl *SubscriptionController) DeleteSubscriptionByID(ctx *gin.Context) {
 	var id apiModels.ItemByIDRequest
 	if err := ctx.ShouldBindUri(&id); err != nil {
@@ -114,10 +160,24 @@ func (ctrl *SubscriptionController) DeleteSubscriptionByID(ctx *gin.Context) {
 	ctx.AbortWithStatus(http.StatusOK)
 }
 
+// ListSubscriptions godoc
+// @Summary List subscriptions
+// @Description Returns a list of subscriptions based on filters
+// @Tags subscriptions
+// @Produce json
+// @Success 501 "Not Implemented"
+// @Router /subscriptions [get]
 func (ctrl *SubscriptionController) ListSubscriptions(ctx *gin.Context) {
 	ctx.AbortWithStatus(http.StatusNotImplemented)
 }
 
+// TotalSubscriptionsCost godoc
+// @Summary Get total cost
+// @Description Calculates total cost of subscriptions for a period
+// @Tags subscriptions
+// @Produce json
+// @Success 501 "Not Implemented"
+// @Router /subscriptions/total [get]
 func (ctrl *SubscriptionController) TotalSubscriptionsCost(ctx *gin.Context) {
 	ctx.AbortWithStatus(http.StatusNotImplemented)
 }

@@ -8,7 +8,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 
+	"subscription-aggregator-service/docs"
 	ctrl "subscription-aggregator-service/internal/api/controllers"
 	"subscription-aggregator-service/internal/config"
 )
@@ -40,6 +43,16 @@ func (a *API) registerRoutes() {
 			base.DELETE("/subscriptions/:id", a.ctrl.DeleteSubscriptionByID)
 			base.GET("/subscriptions", a.ctrl.ListSubscriptions)
 		}
+	}
+	{
+		{
+			docs.SwaggerInfo.Title = "Subscription Aggregator Service"
+			docs.SwaggerInfo.Description = "CRUD API for managing user subscriptions"
+			docs.SwaggerInfo.Version = "1.0"
+			docs.SwaggerInfo.Host = fmt.Sprintf("%s:%s", viper.GetString(config.ApiHost), viper.GetString(config.ApiPort))
+			docs.SwaggerInfo.BasePath = viper.GetString(config.ApiBasePath)
+		}
+		a.engine.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 }
 

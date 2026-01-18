@@ -12,7 +12,7 @@ import (
 )
 
 type ErrorResponse struct {
-	Error string `json:"error"`
+	Error string `json:"error" example:"Subscription not found" format:"string"` // Returned error struct example
 }
 
 var (
@@ -21,11 +21,11 @@ var (
 )
 
 type CreateSubscriptionRequest struct {
-	ServiceName string  `json:"service_name"`
-	Price       int     `json:"price"`
-	UserID      string  `json:"user_id"`
-	StartDate   string  `json:"start_date"`
-	EndDate     *string `json:"end_date,omitempty"`
+	ServiceName string  `json:"service_name" example:"Telegram Premium" format:"string"`              // Name of the service
+	Price       int     `json:"price" example:"299" format:"int"`                                     // Price in rubles
+	UserID      string  `json:"user_id" example:"beef4269-0a1b-0c1F-afce-e13873b7b23b" format:"uuid"` // User UUID
+	StartDate   string  `json:"start_date" example:"01-2026" format:"string"`                         // Start date in MM-YYYY format
+	EndDate     *string `json:"end_date,omitempty" example:"02-2026" format:"string"`                 // (Optional) End date in MM-YYYY format
 }
 
 func (req *CreateSubscriptionRequest) Validate() error {
@@ -84,15 +84,15 @@ func (req *CreateSubscriptionRequest) ParseDates() (time.Time, *time.Time, error
 }
 
 type CreateSubscriptionResponse struct {
-	ID uuid.UUID `json:"id"`
+	ID uuid.UUID `json:"id" example:"beef4269-0a1b-0c1F-afce-e13873b7b23b" format:"uuid"` // UUID of created subscription
 }
 
 type UpdateSubscriptionRequest struct {
-	ServiceName *string `json:"service_name,omitempty"`
-	Price       *int    `json:"price,omitempty"`
-	UserID      *string `json:"user_id,omitempty"`
-	StartDate   *string `json:"start_date,omitempty"`
-	EndDate     *string `json:"end_date,omitempty"`
+	ServiceName *string `json:"service_name,omitempty" example:"Telegram Premium" format:"string"` // (Optional) Updated name of the service
+	Price       *int    `json:"price,omitempty"  example:"299" format:"int"`                       // (Optional) Updated price of the subscription
+	//UserID      *string `json:"user_id,omitempty"`
+	StartDate *string `json:"start_date,omitempty" example:"02-2026" format:"string"` // (Optional) Updated start date of subscription
+	EndDate   *string `json:"end_date,omitempty" example:"02-2027" format:"string"`   // (Optional) Updated end date of subscription, send empty string ("") to clear
 }
 
 func (req *UpdateSubscriptionRequest) Validate() error {
@@ -102,11 +102,11 @@ func (req *UpdateSubscriptionRequest) Validate() error {
 	if req.Price != nil && *req.Price <= 0 {
 		return fmt.Errorf("price must be above zero")
 	}
-	if req.UserID != nil {
-		if _, err := uuid.Parse(*req.UserID); err != nil {
-			return fmt.Errorf("user ID must be a valid UUID")
-		}
-	}
+	//if req.UserID != nil {
+	//	if _, err := uuid.Parse(*req.UserID); err != nil {
+	//		return fmt.Errorf("user ID must be a valid UUID")
+	//	}
+	//}
 	if req.StartDate != nil {
 		if _, err := dates.String2Date(*req.StartDate); err != nil {
 			return fmt.Errorf("invalid start date format")
@@ -153,5 +153,5 @@ func (req *UpdateSubscriptionRequest) ParseDates() (*time.Time, *time.Time, bool
 }
 
 type ItemByIDRequest struct {
-	ID string `uri:"id" binding:"required,uuid"`
+	ID string `uri:"id" binding:"required,uuid" example:"beef4269-0a1b-0c1F-afce-e13873b7b23b" format:"uuid"` // UUID of subscription
 }

@@ -4,7 +4,7 @@ app: # subscription-aggregator-service 1.0
     file_path: "application.log"
     keep_files: true # Whether to keep old log files
   api:
-    host: "0.0.0.0"
+    host: "localhost"
     port: 8080
     base_path: "/api/v1"
     gin_release_mode: true

@@ -1,0 +1,226 @@
+definitions:
+  models.CreateSubscriptionRequest:
+    properties:
+      end_date:
+        description: (Optional) End date in MM-YYYY format
+        example: 02-2026
+        format: string
+        type: string
+      price:
+        description: Price in rubles
+        example: 299
+        format: int
+        type: integer
+      service_name:
+        description: Name of the service
+        example: Telegram Premium
+        format: string
+        type: string
+      start_date:
+        description: Start date in MM-YYYY format
+        example: 01-2026
+        format: string
+        type: string
+      user_id:
+        description: User UUID
+        example: beef4269-0a1b-0c1F-afce-e13873b7b23b
+        format: uuid
+        type: string
+    type: object
+  models.ErrorResponse:
+    properties:
+      error:
+        description: Returned error struct example
+        example: Subscription not found
+        format: string
+        type: string
+    type: object
+  models.Subscription:
+    properties:
+      end_date:
+        type: string
+      id:
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        type: string
+      user_id:
+        type: string
+    type: object
+  models.UpdateSubscriptionRequest:
+    properties:
+      end_date:
+        description: (Optional) Updated end date of subscription, send empty string
+          ("") to clear
+        example: 02-2027
+        format: string
+        type: string
+      price:
+        description: (Optional) Updated price of the subscription
+        example: 299
+        format: int
+        type: integer
+      service_name:
+        description: (Optional) Updated name of the service
+        example: Telegram Premium
+        format: string
+        type: string
+      start_date:
+        description: UserID      *string `json:"user_id,omitempty"`
+        example: 02-2026
+        format: string
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /subscriptions:
+    get:
+      description: Returns a list of subscriptions based on filters
+      produces:
+      - application/json
+      responses:
+        "501":
+          description: Not Implemented
+      summary: List subscriptions
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Adds a new subscription record to the database with given details
+      parameters:
+      - description: New subscription details
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.CreateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Subscription'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Create a new subscription
+      tags:
+      - subscriptions
+  /subscriptions/{id}:
+    delete:
+      description: Marks a subscription record as (soft-)deleted in the database
+      parameters:
+      - description: Subscription UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Delete a subscription
+      tags:
+      - subscriptions
+    get:
+      description: Returns a single subscription record by its UUID
+      parameters:
+      - description: Subscription UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Subscription'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Get a subscription by ID
+      tags:
+      - subscriptions
+    put:
+      consumes:
+      - application/json
+      description: Updates an existing subscription record. Supports partial updates.
+      parameters:
+      - description: Subscription UUID
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Subscription update data
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.UpdateSubscriptionRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Subscription'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+      summary: Update a subscription
+      tags:
+      - subscriptions
+  /subscriptions/total:
+    get:
+      description: Calculates total cost of subscriptions for a period
+      produces:
+      - application/json
+      responses:
+        "501":
+          description: Not Implemented
+      summary: Get total cost
+      tags:
+      - subscriptions
+swagger: "2.0"
