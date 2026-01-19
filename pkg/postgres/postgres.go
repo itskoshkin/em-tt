@@ -3,13 +3,12 @@ package postgres
 import (
 	"fmt"
 	"log"
+	"subscription-aggregator-service/internal/config"
 
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
-
-	"subscription-aggregator-service/internal/config"
-	"subscription-aggregator-service/internal/models"
+	"gorm.io/gorm/logger"
 )
 
 func NewInstance() *gorm.DB {
@@ -28,12 +27,16 @@ func NewInstance() *gorm.DB {
 		log.Fatalf("Fatal: failed to connect to database: %v", err)
 	}
 
-	//db.Config.Logger.LogMode(logger.Error) //TODO: Get from config
-
-	if err = db.AutoMigrate(&models.Subscription{}); err != nil {
-		fmt.Println()
-		log.Fatalf("Fatal: failed to migrate database: %v", err) //TODO: Text
-	} //TODO: Remove when goosed?
+	switch viper.GetString(config.LogLevel) {
+	case "DEBUG":
+		db.Config.Logger.LogMode(logger.Info)
+	case "INFO":
+		db.Config.Logger.LogMode(logger.Info)
+	case "WARN":
+		db.Config.Logger.LogMode(logger.Warn)
+	case "ERROR":
+		db.Config.Logger.LogMode(logger.Error)
+	}
 
 	fmt.Println("Done.")
 	return db
