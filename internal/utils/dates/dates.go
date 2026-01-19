@@ -19,9 +19,5 @@ func String2Date(s string) (time.Time, error) {
 		return time.Time{}, fmt.Errorf("invalid date format")
 	}
 
-	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC), nil //MARK: Normalize to single day and time, we only care about month and year
-}
-
-func Date2String(d time.Time) string {
-	return fmt.Sprintf("%02d-%04d", int(d.Month()), d.Year())
+	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, time.UTC), nil // Normalize to single day and time, we only care about month and year
 }

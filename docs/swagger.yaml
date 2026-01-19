@@ -77,7 +77,7 @@ definitions:
         format: string
         type: string
       start_date:
-        description: UserID      *string `json:"user_id,omitempty"`
+        description: (Optional) Updated start date of subscription
         example: 02-2026
         format: string
         type: string

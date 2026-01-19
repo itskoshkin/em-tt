@@ -21,5 +21,5 @@ type Subscription struct {
 
 type SubscriptionFilter struct {
 	UserID      *uuid.UUID
-	ServiceName *string //TODO: Tags?
+	ServiceName *string
 }

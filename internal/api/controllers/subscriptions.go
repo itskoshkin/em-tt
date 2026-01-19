@@ -28,7 +28,7 @@ func NewSubscriptionController(ss service.SubscriptionService) *SubscriptionCont
 // @Param request body apiModels.CreateSubscriptionRequest true "New subscription details"
 // @Success 201 {object} models.Subscription
 // @Failure 400 {object} models.ErrorResponse
-// @Failure 500 {object} apiModels.ErrorResponse //MARK: Looks like swaggo/swag doesn't care if it's imported package name or path, models still generated
+// @Failure 500 {object} models.ErrorResponse
 // @Router /subscriptions [post]
 func (ctrl *SubscriptionController) CreateSubscription(ctx *gin.Context) {
 	var req apiModels.CreateSubscriptionRequest
@@ -41,7 +41,7 @@ func (ctrl *SubscriptionController) CreateSubscription(ctx *gin.Context) {
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrValidationError):
-			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()}) //TODO here and below: Hide internal error details? Or nothing sensitive exposed here?
+			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
 		default:
 			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: service.ErrIES.Error()})
 		}

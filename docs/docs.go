@@ -415,7 +415,7 @@ const docTemplate = `{
                     "example": "Telegram Premium"
                 },
                 "start_date": {
-                    "description": "UserID      *string ` + "`" + `json:\"user_id,omitempty\"` + "`" + `",
+                    "description": "(Optional) Updated start date of subscription",
                     "type": "string",
                     "format": "string",
                     "example": "02-2026"

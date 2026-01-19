@@ -54,7 +54,7 @@ func (ss *SubscriptionServiceImpl) CreateSubscription(ctx context.Context, req *
 		ID:          uuid.New(),
 		ServiceName: req.ServiceName,
 		Price:       req.Price,
-		UserID:      uuid.MustParse(req.UserID), //MARK: Assuming already validated above
+		UserID:      uuid.MustParse(req.UserID), // Assuming already validated above
 		StartDate:   start,
 		EndDate:     end,
 		CreatedAt:   time.Now(),
@@ -141,9 +141,6 @@ func (ss *SubscriptionServiceImpl) UpdateSubscriptionByID(ctx context.Context, i
 	if updated.Price != nil {
 		current.Price = *updated.Price
 	}
-	//if updated.UserID != nil {
-	//	current.UserID = uuid.MustParse(*updated.UserID) //MARK: Assuming already validated above; not stated if we should allow changing ID
-	//}
 	current.StartDate = startDate
 	current.EndDate = endDate
 	current.UpdatedAt = time.Now()

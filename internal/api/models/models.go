@@ -90,9 +90,8 @@ type CreateSubscriptionResponse struct {
 type UpdateSubscriptionRequest struct {
 	ServiceName *string `json:"service_name,omitempty" example:"Telegram Premium" format:"string"` // (Optional) Updated name of the service
 	Price       *int    `json:"price,omitempty"  example:"299" format:"int"`                       // (Optional) Updated price of the subscription
-	//UserID      *string `json:"user_id,omitempty"`
-	StartDate *string `json:"start_date,omitempty" example:"02-2026" format:"string"` // (Optional) Updated start date of subscription
-	EndDate   *string `json:"end_date,omitempty" example:"02-2027" format:"string"`   // (Optional) Updated end date of subscription, send empty string ("") to clear
+	StartDate   *string `json:"start_date,omitempty" example:"02-2026" format:"string"`            // (Optional) Updated start date of subscription
+	EndDate     *string `json:"end_date,omitempty" example:"02-2027" format:"string"`              // (Optional) Updated end date of subscription, send empty string ("") to clear
 }
 
 func (req *UpdateSubscriptionRequest) Validate() error {
@@ -102,11 +101,6 @@ func (req *UpdateSubscriptionRequest) Validate() error {
 	if req.Price != nil && *req.Price <= 0 {
 		return fmt.Errorf("price must be above zero")
 	}
-	//if req.UserID != nil {
-	//	if _, err := uuid.Parse(*req.UserID); err != nil {
-	//		return fmt.Errorf("user ID must be a valid UUID")
-	//	}
-	//}
 	if req.StartDate != nil {
 		if _, err := dates.String2Date(*req.StartDate); err != nil {
 			return fmt.Errorf("invalid start date format")

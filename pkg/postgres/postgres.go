@@ -3,12 +3,13 @@ package postgres
 import (
 	"fmt"
 	"log"
-	"subscription-aggregator-service/internal/config"
 
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+
+	"subscription-aggregator-service/internal/config"
 )
 
 func NewInstance() *gorm.DB {

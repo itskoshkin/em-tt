@@ -63,7 +63,6 @@ func (a *API) registerRoutes() {
 }
 
 func (a *API) Run() {
-	//TODO: Graceful shutdown?
 	address := fmt.Sprintf("%s:%s", viper.GetString(config.ApiHost), viper.GetString(config.ApiPort))
 	fmt.Printf("API server listening on %s... \n", address)
 	if err := a.engine.Run(address); err != nil {

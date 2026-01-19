@@ -55,12 +55,13 @@ func ValidateConfigFields() error {
 	var dependent = map[string]string{ // If A=true => must be non-empty B
 		LogToFile: LogFilePath,
 	}
-	var defaults = map[string]any{ // Will be set if not present; //MARK: `any` since Viper's Set() respects the underlying type
+	var defaults = map[string]any{ // Will be set if not present
 		LogEnabled: true, LogLevel: "INFO", LogToFile: false, LogFilePath: "application.log",
 		DatabaseName: "subscription-aggregator-service", DatabaseSslMode: "disable",
 	}
 	var possibleValues = map[string][]string{ // If present, must be one of these values
-		LogLevel: {"DEBUG", "INFO", "WARN", "ERROR"},
+		LogLevel:  {"DEBUG", "INFO", "WARN", "ERROR"},
+		LogFormat: {"text", "json"},
 	}
 
 	for k, v := range defaults {
