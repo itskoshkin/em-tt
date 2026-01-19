@@ -37,6 +37,9 @@ func LoadConfig() {
 		log.Fatalf("Fatal: failed to read configuration: %v", err)
 	}
 
+	viper.SetEnvKeyReplacer(strings.NewReplacer(".", "_"))
+	viper.AutomaticEnv()
+
 	if err := ValidateConfigFields(); err != nil {
 		fmt.Println()
 		log.Fatalf("Fatal: failed to load configuration: %v", err)

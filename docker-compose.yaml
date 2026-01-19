@@ -1,0 +1,52 @@
+services:
+  database:
+    image: postgres:16-alpine
+    container_name: subscriptions_database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-subscription-aggregator-service}
+    volumes:
+      - subscription-aggregator-service-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  migrator:
+    build: .
+    container_name: subscriptions_db_migrator
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      GOOSE_DRIVER: postgres
+      GOOSE_DBSTRING: "postgres://${DB_USER:-postgres}:${DB_PASSWORD:-password}@database:5432/${DB_NAME:-subscription-aggregator-service}?sslmode=disable"
+    command: sh -c "goose -dir migrations up"
+
+  application:
+    build: .
+    container_name: subscriptions_api
+    ports:
+      - "8080:8080"
+    depends_on:
+      database:
+        condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
+    environment:
+      APP_DATABASE_HOST: database # service above
+      APP_DATABASE_PORT: 5432
+      APP_DATABASE_USER: ${DB_USER:-postgres}
+      APP_DATABASE_PASSWORD: ${DB_PASSWORD:-password}
+      APP_DATABASE_DATABASE_NAME: ${DB_NAME:-subscription-aggregator-service}
+      APP_DATABASE_SSL_MODE: disable
+      APP_API_HOST: 0.0.0.0
+      APP_API_PORT: 8080
+      APP_LOG_LOG2FILE: "false" # No file logging in Docker by default
+
+volumes:
+  subscription-aggregator-service-data:
