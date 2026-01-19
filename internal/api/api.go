@@ -14,6 +14,7 @@ import (
 	"subscription-aggregator-service/docs"
 	ctrl "subscription-aggregator-service/internal/api/controllers"
 	"subscription-aggregator-service/internal/config"
+	"subscription-aggregator-service/internal/logger"
 )
 
 type API struct {
@@ -22,16 +23,20 @@ type API struct {
 }
 
 func NewAPI(ctrl *ctrl.SubscriptionController) *API {
-	if viper.GetBool(config.GinReleaseMode) {
+	if viper.GetBool(config.GinReleaseMode) && viper.GetString(config.LogLevel) != "DEBUG" {
 		gin.SetMode(gin.ReleaseMode)
 	}
-	e := gin.Default()
+	e := gin.New()
+	_ = e.SetTrustedProxies(nil) // Can nil produce an error? Or can a robot write a symphony?
+	e.Use(logger.GinLoggerMiddleware())
+	e.Use(gin.Recovery())
 	a := &API{engine: e, ctrl: ctrl}
 	a.registerRoutes()
 	return a
 }
 
 func (a *API) registerRoutes() {
+	// API
 	base := a.engine.Group(viper.GetString(config.ApiBasePath))
 	{
 		//subscriptions := base.Group("/subscriptions")
@@ -44,6 +49,7 @@ func (a *API) registerRoutes() {
 			base.GET("/subscriptions", a.ctrl.ListSubscriptions)
 		}
 	}
+	// Swagger
 	{
 		{
 			docs.SwaggerInfo.Title = "Subscription Aggregator Service"

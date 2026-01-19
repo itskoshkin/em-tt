@@ -4,3 +4,4 @@
 .idea/
 # Project
 config.yaml
+*.log

@@ -1,8 +1,10 @@
 app: # subscription-aggregator-service 1.0
   log:
     enabled: true
+    level: "INFO" # Options are "DEBUG", "INFO", "WARN", "ERROR"
+    log2file: true
     file_path: "application.log"
-    keep_files: true # Whether to keep old log files
+    log_format: "text" # Options are "text", "json"
   api:
     host: "localhost"
     port: 8080
@@ -14,4 +16,4 @@ app: # subscription-aggregator-service 1.0
     user: "username"
     password: "password"
     database_name: "subscription-aggregator-service"
-    ssl_mode: "disable"
+    ssl_mode: "disable" # Options are ... //TODO: _
