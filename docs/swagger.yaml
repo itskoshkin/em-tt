@@ -50,6 +50,14 @@ definitions:
       user_id:
         type: string
     type: object
+  models.TotalCostResponse:
+    properties:
+      total_cost:
+        description: Total cost in y.e.
+        example: 3600
+        format: int
+        type: integer
+    type: object
   models.UpdateSubscriptionRequest:
     properties:
       end_date:
@@ -79,12 +87,34 @@ info:
 paths:
   /subscriptions:
     get:
-      description: Returns a list of subscriptions based on filters
+      description: Returns a list of subscriptions with optional filtering by user
+        ID and service name
+      parameters:
+      - description: User UUID
+        in: query
+        name: user_id
+        type: string
+      - description: Service Name
+        in: query
+        name: service_name
+        type: string
       produces:
       - application/json
       responses:
-        "501":
-          description: Not Implemented
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Subscription'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
       summary: List subscriptions
       tags:
       - subscriptions
@@ -215,11 +245,40 @@ paths:
   /subscriptions/total:
     get:
       description: Calculates total cost of subscriptions for a period
+      parameters:
+      - description: User UUID
+        in: query
+        name: user_id
+        type: string
+      - description: Service Name
+        in: query
+        name: service_name
+        type: string
+      - description: Start Date (MM-YYYY)
+        in: query
+        name: start_date
+        required: true
+        type: string
+      - description: End Date (MM-YYYY)
+        in: query
+        name: end_date
+        required: true
+        type: string
       produces:
       - application/json
       responses:
-        "501":
-          description: Not Implemented
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.TotalCostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/models.ErrorResponse'
       summary: Get total cost
       tags:
       - subscriptions

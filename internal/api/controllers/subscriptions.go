@@ -162,13 +162,33 @@ func (ctrl *SubscriptionController) DeleteSubscriptionByID(ctx *gin.Context) {
 
 // ListSubscriptions godoc
 // @Summary List subscriptions
-// @Description Returns a list of subscriptions based on filters
+// @Description Returns a list of subscriptions with optional filtering by user ID and service name
 // @Tags subscriptions
 // @Produce json
-// @Success 501 "Not Implemented"
+// @Param user_id query string false "User UUID"
+// @Param service_name query string false "Service Name"
+// @Success 200 {object} []models.Subscription
+// @Failure 400 {object} apiModels.ErrorResponse
+// @Failure 500 {object} apiModels.ErrorResponse
 // @Router /subscriptions [get]
 func (ctrl *SubscriptionController) ListSubscriptions(ctx *gin.Context) {
-	ctx.AbortWithStatus(http.StatusNotImplemented)
+	var req apiModels.ListSubscriptionsRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	subs, err := ctrl.subscriptionService.ListSubscriptions(ctx, req)
+	if err != nil {
+		if errors.Is(err, service.ErrValidationError) {
+			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: service.ErrIES.Error()})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, subs)
 }
 
 // TotalSubscriptionsCost godoc
@@ -176,8 +196,30 @@ func (ctrl *SubscriptionController) ListSubscriptions(ctx *gin.Context) {
 // @Description Calculates total cost of subscriptions for a period
 // @Tags subscriptions
 // @Produce json
-// @Success 501 "Not Implemented"
+// @Param user_id query string false "User UUID"
+// @Param service_name query string false "Service Name"
+// @Param start_date query string true "Start Date (MM-YYYY)"
+// @Param end_date query string true "End Date (MM-YYYY)"
+// @Success 200 {object} apiModels.TotalCostResponse
+// @Failure 400 {object} apiModels.ErrorResponse
+// @Failure 500 {object} apiModels.ErrorResponse
 // @Router /subscriptions/total [get]
 func (ctrl *SubscriptionController) TotalSubscriptionsCost(ctx *gin.Context) {
-	ctx.AbortWithStatus(http.StatusNotImplemented)
+	var req apiModels.TotalCostRequest
+	if err := ctx.ShouldBindQuery(&req); err != nil {
+		ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+		return
+	}
+
+	resp, err := ctrl.subscriptionService.TotalSubscriptionsCost(ctx, req)
+	if err != nil {
+		if errors.Is(err, service.ErrValidationError) {
+			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
+		} else {
+			ctx.JSON(http.StatusInternalServerError, apiModels.ErrorResponse{Error: service.ErrIES.Error()})
+		}
+		return
+	}
+
+	ctx.JSON(http.StatusOK, resp)
 }

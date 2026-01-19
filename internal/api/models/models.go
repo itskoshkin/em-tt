@@ -155,3 +155,19 @@ func (req *UpdateSubscriptionRequest) ParseDates() (*time.Time, *time.Time, bool
 type ItemByIDRequest struct {
 	ID string `uri:"id" binding:"required,uuid" example:"beef4269-0a1b-0c1F-afce-e13873b7b23b" format:"uuid"` // UUID of subscription
 }
+
+type ListSubscriptionsRequest struct {
+	ServiceName string `form:"service_name" example:"Telegram Premium" format:"string"`                                       // Filter by service name
+	UserID      string `form:"user_id" binding:"omitempty,uuid" example:"550e8400-e29b-41d4-a716-446655440000" format:"uuid"` // Filter by user UUID
+}
+
+type TotalCostRequest struct {
+	UserID      string `form:"user_id" binding:"omitempty,uuid" example:"550e8400-e29b-41d4-a716-446655440000" format:"uuid"` // Filter by user UUID
+	ServiceName string `form:"service_name" example:"Telegram Premium" format:"string"`                                       // Filter by service name
+	StartDate   string `form:"start_date" binding:"required" example:"01-2024" format:"string"`                               // Start date in MM-YYYY format
+	EndDate     string `form:"end_date" binding:"required" example:"12-2024" format:"string"`                                 // End date in MM-YYYY format
+}
+
+type TotalCostResponse struct {
+	TotalCost int64 `json:"total_cost" example:"3600" format:"int"` // Total cost in y.e.
+}

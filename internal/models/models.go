@@ -18,3 +18,8 @@ type Subscription struct {
 	UpdatedAt   time.Time      `json:"-" gorm:"autoUpdateTime"`
 	DeletedAt   gorm.DeletedAt `json:"-" gorm:"index"`
 }
+
+type SubscriptionFilter struct {
+	UserID      *uuid.UUID
+	ServiceName *string //TODO: Tags?
+}

@@ -3,7 +3,6 @@ package storage
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/google/uuid"
@@ -19,7 +18,7 @@ type SubscriptionStorage interface {
 	GetSubscriptionByID(ctx context.Context, id uuid.UUID) (*models.Subscription, error)
 	UpdateSubscriptionByID(ctx context.Context, s *models.Subscription) error
 	DeleteSubscriptionByID(ctx context.Context, id uuid.UUID) error
-	ListSubscriptions(ctx context.Context, i interface{}) ([]models.Subscription, error)
+	ListSubscriptions(ctx context.Context, filter models.SubscriptionFilter) ([]models.Subscription, error)
 }
 
 type SubscriptionStorageImpl struct {
@@ -77,6 +76,20 @@ func (ss *SubscriptionStorageImpl) DeleteSubscriptionByID(ctx context.Context, i
 	return nil
 }
 
-func (ss *SubscriptionStorageImpl) ListSubscriptions(ctx context.Context, i interface{}) ([]models.Subscription, error) {
-	return nil, fmt.Errorf("not implemented")
+func (ss *SubscriptionStorageImpl) ListSubscriptions(ctx context.Context, filter models.SubscriptionFilter) ([]models.Subscription, error) {
+	query := ss.db.WithContext(ctx).Model(&models.Subscription{})
+
+	if filter.UserID != nil {
+		query = query.Where("user_id = ?", *filter.UserID)
+	}
+	if filter.ServiceName != nil {
+		query = query.Where("service_name = ?", *filter.ServiceName)
+	}
+
+	var subs []models.Subscription
+	if err := query.Find(&subs).Error; err != nil {
+		return nil, err
+	}
+
+	return subs, nil
 }
