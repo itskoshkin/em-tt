@@ -252,7 +252,7 @@ func (ss *SubscriptionServiceImpl) TotalSubscriptionsCost(ctx context.Context, r
 
 func calculateSubscriptionCost(sub models.Subscription, startDate, endDate time.Time) int64 {
 	start := startDate
-	if sub.StartDate.After(endDate) {
+	if sub.StartDate.After(startDate) {
 		start = sub.StartDate
 	}
 	end := endDate

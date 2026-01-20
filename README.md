@@ -105,10 +105,15 @@ curl "http://localhost:8080/api/v1/subscriptions/total?user_id=550e8400-e29b-41d
 <details>
 <summary><h2>Нет в ТЗ, но можно сделать</h2></summary>
 
-- Добавить gracefull shutdown
-- Добавить Request ID (~связать HTTP запрос с операцией в БД)
-- Настроить пайплайн CI/CD
-- Покрыть код юнит-тестами
-- Makefile?
+- [ ] Добавить пагинацию для списка подписок
+- [ ] Выполнять агрегацию/фильтрацию в БД, а не в коде
+- [ ] Добавить gracefull shutdown
+- [ ] Покрыть код юнит-тестами
+- [ ] Настроить пайплайн CI/CD и задеплоить на сервер
+- [ ] Добавить Request ID (~связать HTTP запрос с операцией в БД)
+- [ ] Makefile?
+- [ ] Minors
+  - [ ] Перенести Postgres из `pkg/` в `internal/`
+  - [ ] Возвращать `204 NC` вместо `200 OK` при `DELETE`
 
 </details>
