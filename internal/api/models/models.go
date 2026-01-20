@@ -153,6 +153,8 @@ type ItemByIDRequest struct {
 type ListSubscriptionsRequest struct {
 	ServiceName string `form:"service_name" example:"Telegram Premium" format:"string"`                                       // Filter by service name
 	UserID      string `form:"user_id" binding:"omitempty,uuid" example:"550e8400-e29b-41d4-a716-446655440000" format:"uuid"` // Filter by user UUID
+	Limit       *int   `form:"limit" binding:"omitempty,min=1" example:"50" format:"int"`                                     // Limit the number of results
+	Offset      *int   `form:"offset" binding:"omitempty,min=0" example:"0" format:"int"`                                     // Offset for pagination
 }
 
 type TotalCostRequest struct {

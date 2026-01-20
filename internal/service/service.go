@@ -194,6 +194,20 @@ func (ss *SubscriptionServiceImpl) ListSubscriptions(ctx context.Context, req ap
 	if req.ServiceName != "" {
 		filter.ServiceName = &req.ServiceName
 	}
+	if req.Limit != nil {
+		if *req.Limit <= 0 {
+			slog.Warn("failed to validate limit", "limit", *req.Limit)
+			return nil, fmt.Errorf("%w: invalid limit", ErrValidationError)
+		}
+		filter.Limit = req.Limit
+	}
+	if req.Offset != nil {
+		if *req.Offset < 0 {
+			slog.Warn("failed to validate offset", "offset", *req.Offset)
+			return nil, fmt.Errorf("%w: invalid offset", ErrValidationError)
+		}
+		filter.Offset = req.Offset
+	}
 
 	list, err := ss.storage.ListSubscriptions(ctx, filter)
 	if err != nil {
@@ -201,7 +215,7 @@ func (ss *SubscriptionServiceImpl) ListSubscriptions(ctx context.Context, req ap
 		return nil, err
 	}
 
-	slog.Debug("subscriptions list retrieved", "id_filter", filter.UserID, "service_filter", filter.ServiceName)
+	slog.Debug("subscriptions list retrieved", "id_filter", filter.UserID, "service_filter", filter.ServiceName, "limit", filter.Limit, "offset", filter.Offset)
 	return list, nil
 }
 

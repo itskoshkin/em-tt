@@ -22,4 +22,6 @@ type Subscription struct {
 type SubscriptionFilter struct {
 	UserID      *uuid.UUID
 	ServiceName *string
+	Limit       *int
+	Offset      *int
 }

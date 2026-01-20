@@ -156,8 +156,8 @@ func (s *StorageIntegrationTestSuite) TestListSubscriptions() {
 			Price:       299,
 			UserID:      userID,
 			StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
+			CreatedAt:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			UpdatedAt:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			ID:          uuid.New(),
@@ -165,8 +165,8 @@ func (s *StorageIntegrationTestSuite) TestListSubscriptions() {
 			Price:       199,
 			UserID:      userID,
 			StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
+			CreatedAt:   time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC),
+			UpdatedAt:   time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC),
 		},
 		{
 			ID:          uuid.New(),
@@ -174,8 +174,8 @@ func (s *StorageIntegrationTestSuite) TestListSubscriptions() {
 			Price:       299,
 			UserID:      uuid.New(), // Different user
 			StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
-			CreatedAt:   time.Now(),
-			UpdatedAt:   time.Now(),
+			CreatedAt:   time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC),
+			UpdatedAt:   time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC),
 		},
 	}
 
@@ -207,6 +207,13 @@ func (s *StorageIntegrationTestSuite) TestListSubscriptions() {
 	})
 	assert.NoError(s.T(), err)
 	assert.Len(s.T(), result, 1)
+
+	limit := 2
+	result, err = s.storage.ListSubscriptions(s.ctx, models.SubscriptionFilter{Limit: &limit})
+	assert.NoError(s.T(), err)
+	assert.Len(s.T(), result, 2)
+	assert.Equal(s.T(), subs[2].ID, result[0].ID)
+}
 }
 
 func (s *StorageIntegrationTestSuite) TestConcurrentOperations() {

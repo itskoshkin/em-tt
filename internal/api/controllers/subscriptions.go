@@ -167,6 +167,8 @@ func (ctrl *SubscriptionController) DeleteSubscriptionByID(ctx *gin.Context) {
 // @Produce json
 // @Param user_id query string false "User UUID"
 // @Param service_name query string false "Service Name"
+// @Param limit query int false "Limit"
+// @Param offset query int false "Offset"
 // @Success 200 {object} []models.Subscription
 // @Failure 400 {object} apiModels.ErrorResponse
 // @Failure 500 {object} apiModels.ErrorResponse

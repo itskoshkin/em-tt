@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"context"
+	"sort"
 	"time"
 
 	"github.com/google/uuid"
@@ -62,6 +63,20 @@ func (m *MockStorage) ListSubscriptions(ctx context.Context, filter models.Subsc
 			continue
 		}
 		result = append(result, *sub)
+	}
+	sort.Slice(result, func(i, j int) bool {
+		if result[i].CreatedAt.Equal(result[j].CreatedAt) {
+			return result[i].ID.String() > result[j].ID.String()
+		}
+		return result[i].CreatedAt.After(result[j].CreatedAt)
+	})
+	if filter.Offset != nil && *filter.Offset < len(result) {
+		result = result[*filter.Offset:]
+	} else if filter.Offset != nil {
+		result = []models.Subscription{}
+	}
+	if filter.Limit != nil && *filter.Limit < len(result) {
+		result = result[:*filter.Limit]
 	}
 	return result, nil
 }
@@ -529,25 +544,28 @@ func TestListSubscriptions(t *testing.T) {
 		mockStorage := NewMockStorage()
 
 		sub1 := &models.Subscription{
-			ID:          uuid.New(),
+			ID:          uuid.MustParse("00000000-0000-0000-0000-000000000001"),
 			ServiceName: "Netflix",
 			Price:       100,
 			UserID:      userID1,
 			StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
 		}
 		sub2 := &models.Subscription{
-			ID:          uuid.New(),
+			ID:          uuid.MustParse("00000000-0000-0000-0000-000000000002"),
 			ServiceName: "Spotify",
 			Price:       200,
 			UserID:      userID1,
 			StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC),
 		}
 		sub3 := &models.Subscription{
-			ID:          uuid.New(),
+			ID:          uuid.MustParse("00000000-0000-0000-0000-000000000003"),
 			ServiceName: "Netflix",
 			Price:       100,
 			UserID:      userID2,
 			StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+			CreatedAt:   time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC),
 		}
 
 		mockStorage.subscriptions[sub1.ID] = sub1
@@ -634,6 +652,69 @@ func TestListSubscriptions(t *testing.T) {
 				t.Errorf("ListSubscriptions() returned %d items, want %d", len(result), tt.wantCount)
 			}
 		})
+	}
+}
+
+func TestListSubscriptionsPagination(t *testing.T) {
+	ctx := context.Background()
+
+	userID := uuid.MustParse("550e8400-e29b-41d4-a716-446655440000")
+	mockStorage := NewMockStorage()
+
+	sub1 := &models.Subscription{
+		ID:          uuid.MustParse("00000000-0000-0000-0000-000000000011"),
+		ServiceName: "A",
+		Price:       100,
+		UserID:      userID,
+		StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+		CreatedAt:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+	}
+	sub2 := &models.Subscription{
+		ID:          uuid.MustParse("00000000-0000-0000-0000-000000000012"),
+		ServiceName: "B",
+		Price:       200,
+		UserID:      userID,
+		StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+		CreatedAt:   time.Date(2024, 2, 1, 0, 0, 0, 0, time.UTC),
+	}
+	sub3 := &models.Subscription{
+		ID:          uuid.MustParse("00000000-0000-0000-0000-000000000013"),
+		ServiceName: "C",
+		Price:       300,
+		UserID:      userID,
+		StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+		CreatedAt:   time.Date(2024, 3, 1, 0, 0, 0, 0, time.UTC),
+	}
+
+	mockStorage.subscriptions[sub1.ID] = sub1
+	mockStorage.subscriptions[sub2.ID] = sub2
+	mockStorage.subscriptions[sub3.ID] = sub3
+
+	svc := NewSubscriptionService(mockStorage)
+
+	limit := 2
+	result, err := svc.ListSubscriptions(ctx, apiModels.ListSubscriptionsRequest{Limit: &limit})
+	if err != nil {
+		t.Fatalf("ListSubscriptions() unexpected error: %v", err)
+	}
+	if len(result) != 2 {
+		t.Fatalf("ListSubscriptions() returned %d items, want 2", len(result))
+	}
+	if result[0].ID != sub3.ID || result[1].ID != sub2.ID {
+		t.Fatalf("ListSubscriptions() order mismatch: got %v, %v", result[0].ID, result[1].ID)
+	}
+
+	offset := 1
+	limit = 1
+	result, err = svc.ListSubscriptions(ctx, apiModels.ListSubscriptionsRequest{Limit: &limit, Offset: &offset})
+	if err != nil {
+		t.Fatalf("ListSubscriptions() unexpected error: %v", err)
+	}
+	if len(result) != 1 {
+		t.Fatalf("ListSubscriptions() returned %d items, want 1", len(result))
+	}
+	if result[0].ID != sub2.ID {
+		t.Fatalf("ListSubscriptions() expected %v, got %v", sub2.ID, result[0].ID)
 	}
 }
 

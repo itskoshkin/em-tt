@@ -77,13 +77,19 @@ func (ss *SubscriptionStorageImpl) DeleteSubscriptionByID(ctx context.Context, i
 }
 
 func (ss *SubscriptionStorageImpl) ListSubscriptions(ctx context.Context, filter models.SubscriptionFilter) ([]models.Subscription, error) {
-	query := ss.db.WithContext(ctx).Model(&models.Subscription{})
+	query := ss.db.WithContext(ctx).Model(&models.Subscription{}).Order("created_at desc, id desc")
 
 	if filter.UserID != nil {
 		query = query.Where("user_id = ?", *filter.UserID)
 	}
 	if filter.ServiceName != nil {
 		query = query.Where("service_name = ?", *filter.ServiceName)
+	}
+	if filter.Limit != nil {
+		query = query.Limit(*filter.Limit)
+	}
+	if filter.Offset != nil {
+		query = query.Offset(*filter.Offset)
 	}
 
 	var subs []models.Subscription
