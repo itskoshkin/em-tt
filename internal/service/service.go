@@ -249,15 +249,10 @@ func (ss *SubscriptionServiceImpl) TotalSubscriptionsCost(ctx context.Context, r
 		filter.ServiceName = &req.ServiceName
 	}
 
-	subs, err := ss.storage.ListSubscriptions(ctx, filter)
+	totalCost, err := ss.storage.TotalSubscriptionsCost(ctx, filter, startDate, endDate)
 	if err != nil {
-		slog.Error("failed to list subscriptions from database", "error", err)
+		slog.Error("failed to calculate total cost in database", "error", err)
 		return nil, err
-	}
-
-	var totalCost int64
-	for _, sub := range subs {
-		totalCost += calculateSubscriptionCost(sub, startDate, endDate)
 	}
 
 	slog.Info("calculated total cost", "user_id", req.UserID, "total", totalCost, "start", startDate.Format("01-2006"), "end", endDate.Format("01-2006"))

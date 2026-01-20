@@ -81,6 +81,20 @@ func (m *MockStorage) ListSubscriptions(ctx context.Context, filter models.Subsc
 	return result, nil
 }
 
+func (m *MockStorage) TotalSubscriptionsCost(ctx context.Context, filter models.SubscriptionFilter, startDate, endDate time.Time) (int64, error) {
+	var total int64
+	for _, sub := range m.subscriptions {
+		if filter.UserID != nil && sub.UserID != *filter.UserID {
+			continue
+		}
+		if filter.ServiceName != nil && sub.ServiceName != *filter.ServiceName {
+			continue
+		}
+		total += calculateSubscriptionCost(*sub, startDate, endDate)
+	}
+	return total, nil
+}
+
 func TestCreateSubscription(t *testing.T) {
 	mockStorage := NewMockStorage()
 	svc := NewSubscriptionService(mockStorage)

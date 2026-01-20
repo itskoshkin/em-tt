@@ -19,6 +19,7 @@ type SubscriptionStorage interface {
 	UpdateSubscriptionByID(ctx context.Context, s *models.Subscription) error
 	DeleteSubscriptionByID(ctx context.Context, id uuid.UUID) error
 	ListSubscriptions(ctx context.Context, filter models.SubscriptionFilter) ([]models.Subscription, error)
+	TotalSubscriptionsCost(ctx context.Context, filter models.SubscriptionFilter, startDate, endDate time.Time) (int64, error)
 }
 
 type SubscriptionStorageImpl struct {
@@ -98,4 +99,44 @@ func (ss *SubscriptionStorageImpl) ListSubscriptions(ctx context.Context, filter
 	}
 
 	return subs, nil
+}
+
+func (ss *SubscriptionStorageImpl) TotalSubscriptionsCost(ctx context.Context, filter models.SubscriptionFilter, startDate, endDate time.Time) (int64, error) {
+	query := ss.db.WithContext(ctx).Model(&models.Subscription{})
+
+	if filter.UserID != nil {
+		query = query.Where("user_id = ?", *filter.UserID)
+	}
+	if filter.ServiceName != nil {
+		query = query.Where("service_name = ?", *filter.ServiceName)
+	}
+
+	query = query.Where("start_date <= ?", endDate).
+		Where("end_date IS NULL OR end_date >= ?", startDate)
+
+	selectExpr := `
+		COALESCE(SUM(
+			(
+				(
+					EXTRACT(YEAR FROM LEAST(COALESCE(end_date, ?), ?))::int * 12 +
+					EXTRACT(MONTH FROM LEAST(COALESCE(end_date, ?), ?))::int
+				) -
+				(
+					EXTRACT(YEAR FROM GREATEST(start_date, ?))::int * 12 +
+					EXTRACT(MONTH FROM GREATEST(start_date, ?))::int
+				) + 1
+			)::bigint * price
+		), 0)
+	`
+
+	var total int64
+	if err := query.Select(selectExpr,
+		endDate, endDate,
+		endDate, endDate,
+		startDate, startDate,
+	).Scan(&total).Error; err != nil {
+		return 0, err
+	}
+
+	return total, nil
 }

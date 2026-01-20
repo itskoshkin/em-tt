@@ -214,6 +214,52 @@ func (s *StorageIntegrationTestSuite) TestListSubscriptions() {
 	assert.Len(s.T(), result, 2)
 	assert.Equal(s.T(), subs[2].ID, result[0].ID)
 }
+
+func (s *StorageIntegrationTestSuite) TestTotalSubscriptionsCost() {
+	userID := uuid.New()
+
+	sub1 := &models.Subscription{
+		ID:          uuid.New(),
+		ServiceName: "Service A",
+		Price:       100,
+		UserID:      userID,
+		StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+		EndDate:     timePtr(time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC)),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	sub2 := &models.Subscription{
+		ID:          uuid.New(),
+		ServiceName: "Service B",
+		Price:       200,
+		UserID:      userID,
+		StartDate:   time.Date(2024, 6, 1, 0, 0, 0, 0, time.UTC),
+		EndDate:     nil,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+	sub3 := &models.Subscription{
+		ID:          uuid.New(),
+		ServiceName: "Service A",
+		Price:       500,
+		UserID:      uuid.New(),
+		StartDate:   time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC),
+		EndDate:     timePtr(time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC)),
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+	}
+
+	require.NoError(s.T(), s.storage.CreateSubscription(s.ctx, sub1))
+	require.NoError(s.T(), s.storage.CreateSubscription(s.ctx, sub2))
+	require.NoError(s.T(), s.storage.CreateSubscription(s.ctx, sub3))
+
+	filter := models.SubscriptionFilter{UserID: &userID}
+	start := time.Date(2024, 1, 1, 0, 0, 0, 0, time.UTC)
+	end := time.Date(2024, 12, 1, 0, 0, 0, 0, time.UTC)
+
+	total, err := s.storage.TotalSubscriptionsCost(s.ctx, filter, start, end)
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), int64(2600), total)
 }
 
 func (s *StorageIntegrationTestSuite) TestConcurrentOperations() {
@@ -245,6 +291,10 @@ func (s *StorageIntegrationTestSuite) TestConcurrentOperations() {
 	result, err := s.storage.ListSubscriptions(s.ctx, models.SubscriptionFilter{UserID: &userID})
 	assert.NoError(s.T(), err)
 	assert.Len(s.T(), result, 10)
+}
+
+func timePtr(t time.Time) *time.Time {
+	return &t
 }
 
 func TestStorageIntegrationSuite(t *testing.T) {
