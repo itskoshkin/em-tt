@@ -1,8 +1,8 @@
 package models
 
-import "testing"
-
-//
+import (
+	"testing"
+)
 
 func TestCreateSubscriptionRequest_Validate(t *testing.T) {
 	tests := []struct {

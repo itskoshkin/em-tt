@@ -1,10 +1,8 @@
 package dates
 
-import "testing"
-
-//
-
 import (
+	"testing"
+
 	"time"
 )
 

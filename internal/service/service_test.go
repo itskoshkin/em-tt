@@ -1,10 +1,8 @@
 package service
 
-import "testing"
-
-//
-
 import (
+	"testing"
+
 	"context"
 	"time"
 

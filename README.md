@@ -118,7 +118,7 @@ curl "http://localhost:8080/api/v1/subscriptions/total?user_id=550e8400-e29b-41d
 | `internal/utils/dates`     | Парсинг дат из строки → `time.Time`                                                            |
 
 <details>
-<summary><h4>Запуск</h4></summary>
+<summary><h4>Команды для запуска</h4></summary>
 
 ```bash
 # Все тесты
@@ -158,6 +158,94 @@ go test ./... -race
 </details>
 
 </details>
+
+<details>
+<summary><h3>Integration</h3></summary>
+
+Тесты storage-слоя с реальной PostgreSQL в Docker (testcontainers, требует Docker)
+
+| Тест                       | Описание                            |
+|----------------------------|-------------------------------------|
+| `TestCreateSubscription`   | Создание подписки в БД              |
+| `TestGetSubscriptionByID`  | Получение по ID, проверка NotFound  |
+| `TestUpdateSubscription`   | Обновление полей                    |
+| `TestDeleteSubscription`   | Soft-delete                         |
+| `TestListSubscriptions`    | Фильтрация по user_id, service_name |
+| `TestConcurrentOperations` | Конкурентные операции               |
+
+```bash
+go test ./tests/integration/... -tags=integration -v
+```
+
+</details>
+
+<details>
+<summary><h3>E2E</h3></summary>
+
+Полный HTTP flow: запрос → роутер → контроллер → сервис → БД → ответ (требует Docker)
+
+| Тест                       | Описание                                            |
+|----------------------------|-----------------------------------------------------|
+| `TestFullCRUDFlow`         | Полный цикл: Create → Read → Update → List → Delete |
+| `TestTotalCostCalculation` | Расчёт стоимости за период                          |
+| `TestValidationErrors`     | Проверка 400 на невалидные данные                   |
+| `TestNotFound`             | Проверка 404                                        |
+| `TestListWithFilters`      | Фильтрация списка                                   |
+| `TestResponseTimes`        | Время ответа < 500ms                                |
+
+```bash
+go test ./tests/e2e/... -tags=e2e -v
+```
+
+</details>
+
+<details>
+<summary><h3>Smoke</h3></summary>
+
+Базовая проверка что сервис запускается и отвечает
+
+#### Запуск
+
+```bash
+go test ./tests/e2e/... -tags=e2e -run TestSmoke -v
+```
+
+</details>
+
+<details>
+<summary><h3>Load/Perf</h3></summary>
+
+Нагрузочные тесты с метриками: RPS, latency (p50/p95/p99), error rate (требует Docker)
+
+| Тест                           | Описание                               |
+|--------------------------------|----------------------------------------|
+| `TestLoad_CreateSubscriptions` | 10 воркеров × 100 запросов на создание |
+| `TestLoad_ListSubscriptions`   | 20 воркеров × 50 запросов на список    |
+| `TestLoad_MixedOperations`     | Смешанная нагрузка 10 сек              |
+
+**Пример вывода:**
+```
+Load Test Results:
+  Total Requests:    1000
+  Successful:        998
+  Errors:            2
+  Requests/sec:      312.50
+  Avg Latency:       28ms
+  P95 Latency:       85ms
+  P99 Latency:       120ms
+```
+
+```bash
+go test ./tests/load/... -tags=load -v
+```
+
+</details>
+
+#### Запустить все тесты
+
+```bash
+go test ./... -tags=integration,e2e,load
+```
 
 </details>
 
