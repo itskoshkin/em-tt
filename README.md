@@ -103,12 +103,71 @@ curl "http://localhost:8080/api/v1/subscriptions/total?user_id=550e8400-e29b-41d
 </details>
 
 <details>
-<summary><h2>Нет в ТЗ, но можно сделать</h2></summary>
+<summary><h2>Тесты</h2></summary>
+
+<details>
+<summary><h3>Unit</h3></summary>
+
+#### Покрытие
+
+| Пакет                      | Что тестируется                                                                                |
+|----------------------------|------------------------------------------------------------------------------------------------|
+| `internal/api/controllers` | HTTP handlers: статус-коды, формат ответов, обработка ошибок                                   |
+| `internal/api/models`      | Валидация request-моделей, парсинг дат                                                         |
+| `internal/service`         | Бизнес-логика: CRUD операции, валидация, расчёт стоимости подписок                             |
+| `internal/utils/dates`     | Парсинг дат из строки → `time.Time`                                                            |
+
+<details>
+<summary><h4>Запуск</h4></summary>
+
+```bash
+# Все тесты
+go test ./...
+```
+
+```bash
+# С подробным выводом
+go test ./... -v
+```
+
+```bash
+# Конкретный пакет
+go test ./internal/service/...
+```
+
+```bash
+# Конкретный тест
+go test ./internal/service -run TestCalculateSubscriptionCost
+```
+
+```bash
+# С покрытием
+go test ./... -cover 
+```
+
+```bash
+# Генерация HTML-отчёта покрытия
+go test ./... -coverprofile=coverage.out && go tool cover -html=coverage.out -o coverage.html
+```
+
+```bash
+# С race detector
+go test ./... -race
+```
+
+</details>
+
+</details>
+
+</details>
+
+<details>
+<summary><h2>TODO</h2></summary>
 
 - [ ] Добавить пагинацию для списка подписок
 - [ ] Выполнять агрегацию/фильтрацию в БД, а не в коде
 - [ ] Добавить gracefull shutdown
-- [ ] Покрыть код юнит-тестами
+- [x] Покрыть код юнит-тестами
 - [ ] Настроить пайплайн CI/CD и задеплоить на сервер
 - [ ] Добавить Request ID (~связать HTTP запрос с операцией в БД)
 - [ ] Makefile?
