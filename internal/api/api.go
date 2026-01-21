@@ -1,10 +1,8 @@
 package api
 
 import (
-	"errors"
 	"fmt"
 	"log"
-	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/spf13/viper"
@@ -15,6 +13,7 @@ import (
 	ctrl "subscription-aggregator-service/internal/api/controllers"
 	"subscription-aggregator-service/internal/config"
 	"subscription-aggregator-service/internal/logger"
+	"subscription-aggregator-service/internal/utils/graceful"
 )
 
 type API struct {
@@ -65,9 +64,8 @@ func (a *API) registerRoutes() {
 func (a *API) Run() {
 	address := fmt.Sprintf("%s:%s", viper.GetString(config.ApiHost), viper.GetString(config.ApiPort))
 	fmt.Printf("API server listening on %s... \n", address)
-	if err := a.engine.Run(address); err != nil {
-		if !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("Fatal: %s", err)
-		}
+
+	if err := graceful.RunGin(a.engine, address, viper.GetDuration(config.ApiShutdownTimeout)); err != nil {
+		log.Printf("API server shutdown error: %v", err)
 	}
 }

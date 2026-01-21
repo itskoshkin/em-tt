@@ -15,10 +15,11 @@ const (
 	LogFilePath = "app.log.file_path"
 	LogFormat   = "app.log.log_format"
 
-	ApiHost        = "app.api.host"
-	ApiPort        = "app.api.port"
-	ApiBasePath    = "app.api.base_path"
-	GinReleaseMode = "app.api.gin_release_mode"
+	ApiHost            = "app.api.host"
+	ApiPort            = "app.api.port"
+	ApiBasePath        = "app.api.base_path"
+	GinReleaseMode     = "app.api.gin_release_mode"
+	ApiShutdownTimeout = "app.api.shutdown_timeout"
 
 	DatabaseHost     = "app.database.host"
 	DatabasePort     = "app.database.port"
@@ -57,7 +58,8 @@ func ValidateConfigFields() error {
 	}
 	var defaults = map[string]any{ // Will be set if not present
 		LogEnabled: true, LogLevel: "INFO", LogToFile: false, LogFilePath: "application.log",
-		DatabaseName: "subscription-aggregator-service", DatabaseSslMode: "disable",
+		ApiShutdownTimeout: "5s",
+		DatabaseName:       "subscription-aggregator-service", DatabaseSslMode: "disable",
 	}
 	var possibleValues = map[string][]string{ // If present, must be one of these values
 		LogLevel:  {"DEBUG", "INFO", "WARN", "ERROR"},
@@ -110,6 +112,10 @@ func ValidateConfigFields() error {
 		if !ok {
 			return fmt.Errorf("invalid value '%s' for key '%s': must be one of [%s]", key, val, strings.Join(allowed, ", "))
 		}
+	}
+
+	if viper.GetDuration(ApiShutdownTimeout) <= 0 {
+		return fmt.Errorf("invalid value '%s' for key '%s': must be >0", viper.GetString(ApiShutdownTimeout), ApiShutdownTimeout)
 	}
 
 	return nil
