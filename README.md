@@ -258,9 +258,9 @@ go test ./... -tags=integration,e2e,load
 - [x] Покрыть код юнит-тестами
 - [x] Добавить Request ID (~связать HTTP запрос с операцией в БД)
 - [x] Makefile?
-- [ ] Minors
-  - [ ] Перенести Postgres из `pkg/` в `internal/`
-  - [ ] Возвращать `204 NC` вместо `200 OK` при `DELETE`
+- [x] Minors
+    - [x] Возвращать `204 NC` вместо `200 OK` при `DELETE`
+    - [x] Перенести Postgres из `pkg/` в `internal/`
 - [ ] Настроить пайплайн CI/CD и задеплоить на сервер
 
 </details>

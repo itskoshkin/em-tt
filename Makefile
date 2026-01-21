@@ -23,7 +23,7 @@ docker:
 	docker build -t $(DOCKER_IMAGE) .
 
 compose:
-	docker compose up -d
+	docker compose up --build
 
 deploy:
 	@echo "//TODO: _"

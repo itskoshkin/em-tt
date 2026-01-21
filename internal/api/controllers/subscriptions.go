@@ -157,7 +157,7 @@ func (ctrl *SubscriptionController) DeleteSubscriptionByID(ctx *gin.Context) {
 		return
 	}
 
-	ctx.AbortWithStatus(http.StatusOK)
+	ctx.AbortWithStatus(http.StatusNoContent)
 }
 
 // ListSubscriptions godoc

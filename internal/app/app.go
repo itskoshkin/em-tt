@@ -17,7 +17,7 @@ type App struct {
 func Load() *App {
 	config.LoadConfig()
 	logger.SetupLogger()
-	db := postgres.NewInstance()
+	db := postgres.NewInstance(config.DatabaseConfig())
 	st := storage.NewSubscriptionsStorage(db)
 	svc := service.NewSubscriptionService(st)
 	ctrl := controllers.NewSubscriptionController(svc)

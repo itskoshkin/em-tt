@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"strings"
+	"subscription-aggregator-service/pkg/postgres"
 
 	"github.com/spf13/viper"
 )
@@ -119,4 +120,16 @@ func ValidateConfigFields() error {
 	}
 
 	return nil
+}
+
+func DatabaseConfig() postgres.Config {
+	return postgres.Config{
+		Host:     viper.GetString(DatabaseHost),
+		Port:     viper.GetString(DatabasePort),
+		User:     viper.GetString(DatabaseUser),
+		Password: viper.GetString(DatabasePassword),
+		Database: viper.GetString(DatabaseName),
+		SSLMode:  viper.GetString(DatabaseSslMode),
+		LogLevel: viper.GetString(LogLevel),
+	}
 }
