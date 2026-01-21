@@ -11,6 +11,7 @@ import (
 
 	"subscription-aggregator-service/docs"
 	ctrl "subscription-aggregator-service/internal/api/controllers"
+	"subscription-aggregator-service/internal/api/middlewares"
 	"subscription-aggregator-service/internal/config"
 	"subscription-aggregator-service/internal/logger"
 	"subscription-aggregator-service/internal/utils/graceful"
@@ -27,8 +28,9 @@ func NewAPI(ctrl *ctrl.SubscriptionController) *API {
 	}
 	e := gin.New()
 	_ = e.SetTrustedProxies(nil) // Can nil produce an error? Or can a robot write a symphony?
-	e.Use(logger.GinLoggerMiddleware())
 	e.Use(gin.Recovery())
+	e.Use(logger.GinLoggerMiddleware())
+	e.Use(middlewares.RequestID())
 	a := &API{engine: e, ctrl: ctrl}
 	a.registerRoutes()
 	return a

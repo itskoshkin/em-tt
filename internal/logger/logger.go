@@ -12,6 +12,7 @@ import (
 	"github.com/spf13/viper"
 
 	"subscription-aggregator-service/internal/config"
+	"subscription-aggregator-service/internal/utils/request"
 )
 
 func SetupLogger() {
@@ -91,6 +92,10 @@ func GinLoggerMiddleware() gin.HandlerFunc {
 			slog.String("ip", ipAddr),
 			slog.String("user_agent", userAgent),
 			slog.Duration("duration", duration),
+		}
+
+		if id, ok := request.FromContext(ctx.Request.Context()); ok {
+			args = append(args, slog.String("request_id", id))
 		}
 
 		if errors != "" {

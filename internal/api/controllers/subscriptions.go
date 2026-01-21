@@ -37,7 +37,7 @@ func (ctrl *SubscriptionController) CreateSubscription(ctx *gin.Context) {
 		return
 	}
 
-	sub, err := ctrl.subscriptionService.CreateSubscription(ctx, &req)
+	sub, err := ctrl.subscriptionService.CreateSubscription(ctx.Request.Context(), &req)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrValidationError):
@@ -69,7 +69,7 @@ func (ctrl *SubscriptionController) GetSubscriptionByID(ctx *gin.Context) {
 		return
 	}
 
-	sub, err := ctrl.subscriptionService.GetSubscriptionByID(ctx, id)
+	sub, err := ctrl.subscriptionService.GetSubscriptionByID(ctx.Request.Context(), id)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrValidationError):
@@ -111,7 +111,7 @@ func (ctrl *SubscriptionController) UpdateSubscriptionByID(ctx *gin.Context) {
 		return
 	}
 
-	sub, err := ctrl.subscriptionService.UpdateSubscriptionByID(ctx, id, &req)
+	sub, err := ctrl.subscriptionService.UpdateSubscriptionByID(ctx.Request.Context(), id, &req)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrValidationError):
@@ -144,7 +144,7 @@ func (ctrl *SubscriptionController) DeleteSubscriptionByID(ctx *gin.Context) {
 		return
 	}
 
-	err := ctrl.subscriptionService.DeleteSubscriptionByID(ctx, id)
+	err := ctrl.subscriptionService.DeleteSubscriptionByID(ctx.Request.Context(), id)
 	if err != nil {
 		switch {
 		case errors.Is(err, service.ErrValidationError):
@@ -180,7 +180,7 @@ func (ctrl *SubscriptionController) ListSubscriptions(ctx *gin.Context) {
 		return
 	}
 
-	subs, err := ctrl.subscriptionService.ListSubscriptions(ctx, req)
+	subs, err := ctrl.subscriptionService.ListSubscriptions(ctx.Request.Context(), req)
 	if err != nil {
 		if errors.Is(err, service.ErrValidationError) {
 			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})
@@ -213,7 +213,7 @@ func (ctrl *SubscriptionController) TotalSubscriptionsCost(ctx *gin.Context) {
 		return
 	}
 
-	resp, err := ctrl.subscriptionService.TotalSubscriptionsCost(ctx, req)
+	resp, err := ctrl.subscriptionService.TotalSubscriptionsCost(ctx.Request.Context(), req)
 	if err != nil {
 		if errors.Is(err, service.ErrValidationError) {
 			ctx.JSON(http.StatusBadRequest, apiModels.ErrorResponse{Error: err.Error()})

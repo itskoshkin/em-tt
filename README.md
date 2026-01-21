@@ -256,8 +256,8 @@ go test ./... -tags=integration,e2e,load
 - [x] Выполнять агрегацию/фильтрацию в БД, а не в коде
 - [x] Добавить gracefull shutdown
 - [x] Покрыть код юнит-тестами
+- [x] Добавить Request ID (~связать HTTP запрос с операцией в БД)
 - [ ] Настроить пайплайн CI/CD и задеплоить на сервер
-- [ ] Добавить Request ID (~связать HTTP запрос с операцией в БД)
 - [ ] Makefile?
 - [ ] Minors
   - [ ] Перенести Postgres из `pkg/` в `internal/`
